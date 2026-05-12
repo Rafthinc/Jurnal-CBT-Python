@@ -1,0 +1,14 @@
+[project]
+name = "inventar-ganduri-automate"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "bcrypt>=5.0.0",
+    "fpdf>=1.7.2",
+    "matplotlib>=3.10.9",
+    "pandas>=3.0.3",
+    "streamlit>=1.57.0",
+    "streamlit-authenticator>=0.4.2",
+]
