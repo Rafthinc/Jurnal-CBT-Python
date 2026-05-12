@@ -354,6 +354,12 @@ def run_ui():
 
     if st.session_state.get("authentication_status"):
         username = st.session_state["username"]
+        
+        # Log the login once per session
+        if "login_logged" not in st.session_state:
+            db_service.log_user_login(username)
+            st.session_state.login_logged = True
+            
         with st.sidebar:
             st.write(f'Bun venit, *{st.session_state["name"]}*!')
             authenticator.logout('Logout', 'main')

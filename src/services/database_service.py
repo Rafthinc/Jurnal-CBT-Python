@@ -76,6 +76,17 @@ class DatabaseService:
             ))
         return entries
 
+    def log_user_login(self, username: str):
+        try:
+            from datetime import datetime
+            data = {
+                "username": username,
+                "login_time": datetime.utcnow().isoformat()
+            }
+            self.supabase.table('user_logins').insert(data).execute()
+        except Exception as e:
+            print(f"Error logging login: {e}")
+
     def get_admin_stats(self) -> tuple:
         # Count total users
         response_users = self.supabase.table('users').select('*', count='exact').execute()
