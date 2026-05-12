@@ -176,6 +176,28 @@ def show_cbt_form(username: str):
         st.header("3. Ce gândeai în acel moment? (Gânduri)")
         st.info("Gândurile sunt modul în care ai interpretat situația. Adesea ele generează și amplifică emoțiile resimțite.")
         
+        with st.expander("💡 Întrebări ajutătoare pentru identificarea gândurilor"):
+            st.markdown("""
+            * **General:**
+              * Ce mi-a trecut prin minte chiar înainte să încep să mă simt în felul acesta?
+              * La ce m-am gândit în această situație?
+              * Ce imagini sau amintiri am în această situație?
+              * Este ceva specific la această situație sau la modul în care mă simt, care mă îngrijorează?
+            * **Depresie / Tristețe:**
+              * Ce spune asta despre mine? Despre viața mea? Despre viitorul meu?
+            * **Anxietate / Frică:**
+              * Ce mă tem că s-ar putea întâmpla?
+              * Care este cel mai rău lucru care se poate întâmpla? *(Încearcă să te gândești la cel mai rău lucru care se poate întâmpla fără a te gândi cât de probabil este chiar să se întâmple)*
+            * **Furie, Rușine, Frică, Tristețe:**
+              * Ce spune asta despre cum ar putea gândi și simți legat de mine, altă persoană?
+            * **Furie, Tristețe, Anxietate:**
+              * Ce spune asta despre cealaltă persoană sau despre oameni, în general?
+            * **Vinovăție, Rușine:**
+              * Am încălcat anumite reguli, am rănit pe cineva sau nu am făcut ceva ce trebuia să fac?
+            * **Vinovăție, Rușine, Anxietate:**
+              * Ce cred despre mine ca urmare a ceea ce am gândit sau a ceea ce am făcut?
+            """)
+        
         emotii_alese = st.session_state.emotii_alese
         ganduri_examples = ["Alege un exemplu..."]
         if emotii_alese:
