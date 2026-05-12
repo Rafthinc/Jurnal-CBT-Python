@@ -100,3 +100,21 @@ class DatabaseService:
                 data_creare=row[6]
             ))
         return entries
+
+    def get_admin_stats(self) -> tuple:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Count total users
+            cursor.execute("SELECT COUNT(*) FROM users")
+            total_users = cursor.fetchone()[0]
+            
+            # Count total CBT entries
+            cursor.execute("SELECT COUNT(*) FROM cbt_entries")
+            total_entries = cursor.fetchone()[0]
+            
+            # Get list of all users
+            cursor.execute("SELECT username, email, name FROM users")
+            users_data = cursor.fetchall()
+            
+        return total_users, total_entries, users_data

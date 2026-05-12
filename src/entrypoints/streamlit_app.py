@@ -202,6 +202,21 @@ def show_dashboard(username: str):
     st.subheader("Istoric Jurnale")
     st.dataframe(df.reset_index()[['Data', 'Intensitate Emoție', 'Emoții', 'Situație']], use_container_width=True)
 
+def show_admin_dashboard():
+    st.header("👑 Panou de Administrare")
+    total_users, total_entries, users_data = db_service.get_admin_stats()
+    
+    col1, col2 = st.columns(2)
+    col1.metric("Total Utilizatori Înregistrați", total_users)
+    col2.metric("Total Jurnale CBT Generate", total_entries)
+    
+    st.subheader("Lista Utilizatorilor")
+    if users_data:
+        df_users = pd.DataFrame(users_data, columns=["Username (Email)", "Email", "Nume Complet"])
+        st.dataframe(df_users, use_container_width=True)
+    else:
+        st.info("Niciun utilizator înregistrat momentan.")
+
 def run_ui():
     st.set_page_config(page_title="CBT Log - apps4mind", layout="centered")
     init_session_state()
@@ -229,13 +244,25 @@ def run_ui():
             st.write(f'Bun venit, *{st.session_state["name"]}*!')
             authenticator.logout('Logout', 'main')
 
-        tab1, tab2 = st.tabs(["📝 Jurnal Nou", "📈 Evoluție și Istoric"])
-        
-        with tab1:
-            show_cbt_form(username)
-            
-        with tab2:
-            show_dashboard(username)
+        # --- ADMIN CONFIGURATION ---
+        # Modify this list to include your actual email address
+        ADMIN_EMAILS = ["admin@apps4mind.ro"] 
+        is_admin = username in ADMIN_EMAILS
+
+        if is_admin:
+            tab1, tab2, tab3 = st.tabs(["📝 Jurnal Nou", "📈 Evoluție și Istoric", "👑 Admin"])
+            with tab1:
+                show_cbt_form(username)
+            with tab2:
+                show_dashboard(username)
+            with tab3:
+                show_admin_dashboard()
+        else:
+            tab1, tab2 = st.tabs(["📝 Jurnal Nou", "📈 Evoluție și Istoric"])
+            with tab1:
+                show_cbt_form(username)
+            with tab2:
+                show_dashboard(username)
 
     elif st.session_state.get("authentication_status") is False:
         st.error('Username sau parolă incorectă')
