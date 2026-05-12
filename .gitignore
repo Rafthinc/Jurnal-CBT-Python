@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Streamlit secrets
+.streamlit/secrets.toml
+cbt_data.db

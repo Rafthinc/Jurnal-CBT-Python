@@ -11,4 +11,5 @@ dependencies = [
     "pandas>=3.0.3",
     "streamlit>=1.57.0",
     "streamlit-authenticator>=0.4.2",
+    "supabase==2.5.0",
 ]
