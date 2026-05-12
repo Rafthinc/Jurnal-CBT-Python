@@ -28,6 +28,8 @@ class PDFGeneratorService:
 
     @staticmethod
     def _generate_history_chart(history: List[CBTEntry], temp_path: str):
+        import matplotlib.dates as mdates
+        
         # Prepare data
         dates = pd.to_datetime([entry.data_creare for entry in history], format="%d/%m/%Y %H:%M:%S")
         intensities = [entry.intensitate_emotie for entry in history]
@@ -40,6 +42,11 @@ class PDFGeneratorService:
         plt.ylabel('Intensitate Emoție (0-10)', fontsize=10, color='#666666')
         plt.ylim(-0.5, 10.5)
         plt.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        # Format the x-axis to show the date clearly
+        ax = plt.gca()
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y %H:%M'))
+        
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         

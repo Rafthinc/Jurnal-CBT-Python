@@ -46,135 +46,249 @@ BEHAVIORS_BY_EMOTION = {
 }
 
 def init_session_state():
+    if "current_step" not in st.session_state:
+        st.session_state.current_step = 1
     if "situatie_text" not in st.session_state:
         st.session_state.situatie_text = ""
     if "ganduri_text" not in st.session_state:
         st.session_state.ganduri_text = ""
     if "comportament_text" not in st.session_state:
         st.session_state.comportament_text = ""
+    if "emotii_alese" not in st.session_state:
+        st.session_state.emotii_alese = []
+    if "intensitate_val" not in st.session_state:
+        st.session_state.intensitate_val = 5
+    if "veridicitate_val" not in st.session_state:
+        st.session_state.veridicitate_val = 5
 
 def apply_situatie():
     val = st.session_state.situatie_select
     if val and val not in ["Alege un exemplu...", "Selectează cel puțin o emoție pentru exemple specifice."]:
-        if st.session_state.situatie_text:
-            st.session_state.situatie_text += "\n" + val
-        else:
-            st.session_state.situatie_text = val
+        current_text = st.session_state.situatie_text
+        new_text = current_text + "\n" + val if current_text else val
+        st.session_state.situatie_text = new_text
         st.session_state.situatie_select = "Alege un exemplu..."
+        st.session_state._situatie_text_widget = new_text
+
+def update_situatie():
+    if "_situatie_text_widget" in st.session_state:
+        st.session_state.situatie_text = st.session_state._situatie_text_widget
 
 def apply_gand():
     val = st.session_state.gand_select
     if val and val not in ["Alege un exemplu...", "Selectează cel puțin o emoție pentru exemple specifice."]:
-        if st.session_state.ganduri_text:
-            st.session_state.ganduri_text += "\n" + val
-        else:
-            st.session_state.ganduri_text = val
+        current_text = st.session_state.ganduri_text
+        new_text = current_text + "\n" + val if current_text else val
+        st.session_state.ganduri_text = new_text
         st.session_state.gand_select = "Alege un exemplu..."
+        st.session_state._ganduri_text_widget = new_text
+
+def update_ganduri():
+    if "_ganduri_text_widget" in st.session_state:
+        st.session_state.ganduri_text = st.session_state._ganduri_text_widget
 
 def apply_comportament():
     val = st.session_state.comportament_select
     if val and val not in ["Alege un exemplu...", "Selectează cel puțin o emoție pentru exemple specifice."]:
-        if st.session_state.comportament_text:
-            st.session_state.comportament_text += "\n" + val
-        else:
-            st.session_state.comportament_text = val
+        current_text = st.session_state.comportament_text
+        new_text = current_text + "\n" + val if current_text else val
+        st.session_state.comportament_text = new_text
         st.session_state.comportament_select = "Alege un exemplu..."
+        st.session_state._comportament_text_widget = new_text
+
+def update_comportament():
+    if "_comportament_text_widget" in st.session_state:
+        st.session_state.comportament_text = st.session_state._comportament_text_widget
+
+def next_step():
+    st.session_state.current_step += 1
+
+def prev_step():
+    st.session_state.current_step -= 1
 
 def clear_form():
+    st.session_state.current_step = 1
     st.session_state.situatie_text = ""
     st.session_state.ganduri_text = ""
     st.session_state.comportament_text = ""
-    st.session_state.emotii_multiselect = []
-    st.session_state.intensitate_slider = 5
-    st.session_state.veridicitate_slider = 5
-    st.session_state.situatie_select = "Alege un exemplu..."
-    # The others dynamically depend on emotions, but we can set them safely:
+    st.session_state.emotii_alese = []
+    st.session_state.intensitate_val = 5
+    st.session_state.veridicitate_val = 5
+    if "situatie_select" in st.session_state:
+        st.session_state.situatie_select = "Alege un exemplu..."
     if "gand_select" in st.session_state:
         st.session_state.gand_select = "Alege un exemplu..."
     if "comportament_select" in st.session_state:
         st.session_state.comportament_select = "Alege un exemplu..."
+    if "_situatie_text_widget" in st.session_state:
+        st.session_state._situatie_text_widget = ""
+    if "_ganduri_text_widget" in st.session_state:
+        st.session_state._ganduri_text_widget = ""
+    if "_comportament_text_widget" in st.session_state:
+        st.session_state._comportament_text_widget = ""
 
 def show_cbt_form(username: str):
-    st.info("Completează câmpurile de mai jos pentru a genera fișa de conceptualizare. Este mai natural să începi cu emoția resimțită.")
+    step = st.session_state.current_step
     
-    # --- 1. Emoții ---
-    st.header("1. Ce ai simțit? (Emoția)")
-    emotii_alese = st.multiselect("Selectează emoțiile resimțite:", EMOTIONS_LIST, key="emotii_multiselect")
-    intensitate_emotie = st.slider("Intensitatea emoțională (0 - minim, 10 - maxim)", 0, 10, 5, key="intensitate_slider")
-
-    # --- 2. Situație ---
-    st.header("2. Ce s-a întâmplat? (Situația)")
-    st.selectbox("Exemple de situații:", SITUATIONS_EXAMPLES, key="situatie_select", on_change=apply_situatie)
-    situatie = st.text_area("Descrie situația ta (sau folosește un exemplu de mai sus):", key="situatie_text")
-
-    # --- 3. Gânduri ---
-    st.header("3. Ce gândeai în acel moment? (Gânduri)")
+    # Progress bar (5 steps)
+    st.progress(step / 5.0)
     
-    ganduri_examples = ["Alege un exemplu..."]
-    if emotii_alese:
-        for emotie in emotii_alese:
-            if emotie in THOUGHTS_BY_EMOTION:
-                ganduri_examples.extend(THOUGHTS_BY_EMOTION[emotie])
-    else:
-        ganduri_examples.append("Selectează cel puțin o emoție pentru exemple specifice.")
+    if step == 1:
+        st.header("1. Ce ai simțit? (Emoția)")
+        st.info("Emoțiile sunt semnalele corpului tău. Identificarea lor este primul pas în a înțelege ce se întâmplă.")
         
-    st.selectbox("Exemple de gânduri (specifice emoțiilor alese):", ganduri_examples, key="gand_select", on_change=apply_gand)
-    ganduri = st.text_area("Notează gândurile tale (sau alege din exemple):", key="ganduri_text")
-    veridicitate_ganduri = st.slider("Cât de adevărate crezi că sunt aceste gânduri? (0 - deloc, 10 - complet)", 0, 10, 5, key="veridicitate_slider")
-
-    # --- 4. Comportament ---
-    st.header("4. Ce ai făcut? (Comportamentul)")
-    
-    comportamente_examples = ["Alege un exemplu..."]
-    if emotii_alese:
-        for emotie in emotii_alese:
-            if emotie in BEHAVIORS_BY_EMOTION:
-                comportamente_examples.extend(BEHAVIORS_BY_EMOTION[emotie])
-    else:
-        comportamente_examples.append("Selectează cel puțin o emoție pentru exemple specifice.")
+        st.session_state.emotii_alese = st.multiselect(
+            "Selectează emoțiile resimțite:", 
+            EMOTIONS_LIST, 
+            default=st.session_state.emotii_alese
+        )
         
-    st.selectbox("Exemple de comportamente:", comportamente_examples, key="comportament_select", on_change=apply_comportament)
-    comportament = st.text_area("Ce ai făcut ca reacție? (sau alege din exemple):", key="comportament_text")
+        st.session_state.intensitate_val = st.slider(
+            "Intensitatea emoțională (0 - minim, 10 - maxim)", 
+            0, 10, 
+            st.session_state.intensitate_val
+        )
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col3:
+            st.button("Următorul pas ➡️", on_click=next_step, type="primary", use_container_width=True)
 
-    st.markdown("---")
-    # --- Generare Raport ---
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        submit_btn = st.button("Generează Raport și Salvează", type="primary")
-    with col2:
-        st.button("🔄 Resetează Formularul", on_click=clear_form)
+    elif step == 2:
+        st.header("2. Ce s-a întâmplat? (Situația)")
+        st.info("Descrie obiectiv evenimentul care a declanșat aceste emoții, ca și cum l-ai descrie pentru un film, fără interpretări.")
+        
+        st.selectbox("Exemple de situații:", SITUATIONS_EXAMPLES, key="situatie_select", on_change=apply_situatie)
+        
+        st.text_area("Descrie situația ta (sau folosește un exemplu de mai sus):", 
+                     value=st.session_state.situatie_text,
+                     key="_situatie_text_widget",
+                     on_change=update_situatie)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            st.button("⬅️ Înapoi", on_click=prev_step, use_container_width=True)
+        with col3:
+            st.button("Următorul pas ➡️", on_click=next_step, type="primary", use_container_width=True)
 
-    if submit_btn:
-        if all([emotii_alese, situatie, ganduri, comportament]):
-            entry = CBTEntry(
-                situatie=situatie, 
-                ganduri=ganduri, 
-                veridicitate_ganduri=veridicitate_ganduri,
-                emotii=emotii_alese, 
-                intensitate_emotie=intensitate_emotie,
-                comportament=comportament
-            )
-            
-            # Save to Database
-            db_service.add_cbt_entry(username, entry)
-            st.success("Înregistrarea a fost salvată cu succes în istoricul tău!")
-            
-            # Fetch history for chart
-            history = db_service.get_user_entries(username)
-            
-            # Generate PDF with chart
-            pdf_bytes = PDFGeneratorService.create_cbt_report(entry, history)
-            
-            st.download_button(
-                label="📥 Descarcă PDF", 
-                data=pdf_bytes, 
-                file_name="cbt_report.pdf", 
-                mime="application/pdf"
-            )
-            
-            st.info("Formularul poate fi golit acum apăsând butonul de 'Resetează Formularul' de mai sus.")
+    elif step == 3:
+        st.header("3. Ce gândeai în acel moment? (Gânduri)")
+        st.info("Gândurile sunt modul în care ai interpretat situația. Adesea ele generează și amplifică emoțiile resimțite.")
+        
+        emotii_alese = st.session_state.emotii_alese
+        ganduri_examples = ["Alege un exemplu..."]
+        if emotii_alese:
+            for emotie in emotii_alese:
+                if emotie in THOUGHTS_BY_EMOTION:
+                    ganduri_examples.extend(THOUGHTS_BY_EMOTION[emotie])
         else:
-            st.warning("Te rugăm să completezi toate câmpurile obligatorii (situație, gânduri, emoții, comportament).")
+            ganduri_examples.append("Selectează cel puțin o emoție la pasul 1 pentru exemple specifice.")
+            
+        st.selectbox("Exemple de gânduri (specifice emoțiilor alese):", ganduri_examples, key="gand_select", on_change=apply_gand)
+        
+        st.text_area("Notează gândurile tale (sau alege din exemple):", 
+                     value=st.session_state.ganduri_text,
+                     key="_ganduri_text_widget",
+                     on_change=update_ganduri)
+        
+        st.session_state.veridicitate_val = st.slider(
+            "Cât de adevărate crezi că sunt aceste gânduri? (0 - deloc, 10 - complet)", 
+            0, 10, 
+            st.session_state.veridicitate_val
+        )
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            st.button("⬅️ Înapoi", on_click=prev_step, use_container_width=True)
+        with col3:
+            st.button("Următorul pas ➡️", on_click=next_step, type="primary", use_container_width=True)
+
+    elif step == 4:
+        st.header("4. Ce ai făcut? (Comportamentul)")
+        st.info("Comportamentul reprezintă acțiunile tale fizice ca răspuns la situație și emoții.")
+        
+        emotii_alese = st.session_state.emotii_alese
+        comportamente_examples = ["Alege un exemplu..."]
+        if emotii_alese:
+            for emotie in emotii_alese:
+                if emotie in BEHAVIORS_BY_EMOTION:
+                    comportamente_examples.extend(BEHAVIORS_BY_EMOTION[emotie])
+        else:
+            comportamente_examples.append("Selectează cel puțin o emoție la pasul 1 pentru exemple specifice.")
+            
+        st.selectbox("Exemple de comportamente:", comportamente_examples, key="comportament_select", on_change=apply_comportament)
+        
+        st.text_area("Ce ai făcut ca reacție? (sau alege din exemple):", 
+                     value=st.session_state.comportament_text,
+                     key="_comportament_text_widget",
+                     on_change=update_comportament)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            st.button("⬅️ Înapoi", on_click=prev_step, use_container_width=True)
+        with col3:
+            st.button("Către finalizare ➡️", on_click=next_step, type="primary", use_container_width=True)
+
+    elif step == 5:
+        st.header("5. Revizuire și Salvare")
+        st.info("Verifică dacă datele introduse reflectă corect experiența ta. Când ești pregătit, salvează și generează raportul.")
+        
+        emotii_alese = st.session_state.emotii_alese
+        situatie = st.session_state.situatie_text
+        ganduri = st.session_state.ganduri_text
+        comportament = st.session_state.comportament_text
+        intensitate = st.session_state.intensitate_val
+        veridicitate = st.session_state.veridicitate_val
+        
+        with st.expander("Sumarul Jurnalului Tău CBT", expanded=True):
+            st.markdown(f"**Emoții:** {', '.join(emotii_alese) if emotii_alese else '-'} *(Intensitate: {intensitate}/10)*")
+            st.markdown(f"**Situație:** {situatie if situatie else '-'}")
+            st.markdown(f"**Gânduri:** {ganduri if ganduri else '-'} *(Veridicitate: {veridicitate}/10)*")
+            st.markdown(f"**Comportament:** {comportament if comportament else '-'}")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col1:
+            st.button("⬅️ Editează", on_click=prev_step, use_container_width=True)
+        
+        with col2:
+            if st.button("Generează Raport și Salvează", type="primary", use_container_width=True):
+                if all([emotii_alese, situatie, ganduri, comportament]):
+                    entry = CBTEntry(
+                        situatie=situatie, 
+                        ganduri=ganduri, 
+                        veridicitate_ganduri=veridicitate,
+                        emotii=emotii_alese, 
+                        intensitate_emotie=intensitate,
+                        comportament=comportament
+                    )
+                    
+                    # Save to Database
+                    db_service.add_cbt_entry(username, entry)
+                    st.success("Înregistrarea a fost salvată cu succes în istoricul tău!")
+                    
+                    # Fetch history for chart
+                    history = db_service.get_user_entries(username)
+                    
+                    # Generate PDF with chart
+                    pdf_bytes = PDFGeneratorService.create_cbt_report(entry, history)
+                    
+                    st.download_button(
+                        label="📥 Descarcă PDF", 
+                        data=pdf_bytes, 
+                        file_name="cbt_report.pdf", 
+                        mime="application/pdf",
+                        use_container_width=True
+                    )
+                else:
+                    st.warning("Te rugăm să completezi toate câmpurile obligatorii folosind butonul de 'Editează'.")
+
+        with col3:
+            st.button("🔄 Jurnal Nou", on_click=clear_form, use_container_width=True)
 
 
 def show_dashboard(username: str):
